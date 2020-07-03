@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Bot Man</string>
+    <string name="result_okay">Result Okay</string>
+    <string name="result_fail">Result fail</string>
 </resources>

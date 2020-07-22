@@ -29,6 +29,7 @@ public class MainViewModel extends ViewModel {
 			mIsAPIKeyStored.setValue(false);
 		} else {
 			mIsAPIKeyStored.setValue(true);
+			initiateFetch();
 		}
 	}
 

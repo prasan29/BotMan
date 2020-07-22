@@ -49,7 +49,7 @@ public class MainAdapter
 		ResponseItemViewModel viewModel = new ResponseItemViewModel();
 
 		viewModel.getMFromName()
-		         .setValue(result.getMessage().getFrom().getFirstName());
+		         .setValue(result.getMessage().getFrom().getUsername());
 
 		viewModel.getMDate()
 		         .setValue(getFormattedDate(result.getMessage().getDate()));

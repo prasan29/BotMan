@@ -9,18 +9,17 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.bot.man.R;
-import com.bot.man.databinding.ActivityMainBinding;
 import com.bot.man.viewmodel.MainViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
-	ActivityMainBinding mBinding;
 	private MutableLiveData<String> mErrorListener = new MutableLiveData<>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+		com.bot.man.databinding.ActivityMainBinding mBinding =
+				DataBindingUtil.setContentView(this, R.layout.activity_main);
 		MainViewModel viewModel =
 				ViewModelProviders.of(this).get(MainViewModel.class);
 
@@ -29,8 +28,8 @@ public class MainActivity extends AppCompatActivity {
 		mBinding.setViewModel(viewModel);
 		mBinding.setLifecycleOwner(this);
 
-		mErrorListener.observe(this, s -> Toast
-				.makeText(MainActivity.this, "" + s, Toast.LENGTH_SHORT)
+		mErrorListener.observe(this, error -> Toast
+				.makeText(MainActivity.this, "" + error, Toast.LENGTH_SHORT)
 				.show());
 	}
 

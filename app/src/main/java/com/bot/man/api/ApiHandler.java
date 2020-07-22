@@ -52,8 +52,8 @@ public class ApiHandler {
 						      @NotNull Call<Response> call,
 						      @NotNull retrofit2.Response<Response> response) {
 					      if (response.body() != null) {
-						      Log.e(TAG,
-						            "onResponse " + response.body().toString());
+						      Log.e(TAG, "Response status: " +
+						                 response.body().component2());
 						      mOnResultListener
 								      .onUpdateChanged(response.body());
 					      }

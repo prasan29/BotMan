@@ -21,7 +21,7 @@ public class MainAdapter
 	private Response mResponse;
 
 	public void setResponse(Response response) {
-		if (mResponse != null && mResponse.component2()) {
+		if (response != null && response.component2()) {
 			mResponse = response;
 			notifyDataSetChanged();
 		}

@@ -1,6 +1,7 @@
 package com.bot.man.view.activity;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -25,5 +26,12 @@ public class MainActivity
 
 		mBinding.setViewModel(viewModel);
 		mBinding.setLifecycleOwner(this);
+	}
+
+	@Override
+	protected void onStop() {
+		mBinding.getViewModel().onStopActivity();
+		Toast.makeText(this, "Server stopped!", Toast.LENGTH_SHORT).show();
+		super.onStop();
 	}
 }

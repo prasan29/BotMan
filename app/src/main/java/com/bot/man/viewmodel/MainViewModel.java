@@ -34,7 +34,6 @@ public class MainViewModel extends ViewModel {
 	}
 
 	public void initiateFetch() {
-		// TODO: Call API and when the response comes, set the Adapter.
 		MainAdapter mainAdapter = new MainAdapter();
 
 		String localKey =

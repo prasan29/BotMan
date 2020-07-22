@@ -42,8 +42,6 @@ public class ApiHandler {
 
 		@Override
 		public void run() {
-			//TODO: Fetch results and call the onResultListener
-			// .onUpdateChanged(Response response).
 
 			Helper.getInstance(API_KEY).fetchGetUpdates()
 			      .enqueue(new Callback<Response>() {

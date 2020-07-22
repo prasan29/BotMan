@@ -51,9 +51,12 @@ public class ApiHandler {
 				      public void onResponse(
 						      @NotNull Call<Response> call,
 						      @NotNull retrofit2.Response<Response> response) {
-					      Log.e(TAG,
-					            "onResponse " + response.body().toString());
-					      mOnResultListener.onUpdateChanged(response.body());
+					      if (response.body() != null) {
+						      Log.e(TAG,
+						            "onResponse " + response.body().toString());
+						      mOnResultListener
+								      .onUpdateChanged(response.body());
+					      }
 					      interrupt();
 				      }
 
@@ -62,6 +65,7 @@ public class ApiHandler {
 						      @NotNull Call<Response> call,
 						      @NotNull Throwable t) {
 					      Log.e(TAG, "onFailure " + t.getLocalizedMessage());
+					      mOnResultListener.onUpdateError(t);
 				      }
 			      });
 		}

@@ -3,6 +3,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="com.bot.man.viewmodel.MainViewModel" />
@@ -22,7 +24,8 @@
             android:layout_margin="16dp"
             android:hint="API key..."
             android:padding="12dp"
-            android:text="@={viewModel.mApiKey}" />
+            android:text="@={viewModel.mApiKey}"
+            android:visibility="@{viewModel.mIsAPIKeyStored ? View.GONE: View.VISIBLE}" />
 
         <TextView
             android:layout_width="wrap_content"

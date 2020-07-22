@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bot.man.databinding.ItemResponseBinding;
 import com.bot.man.model.data.Response;
-import com.bot.man.model.data.Result;
+import com.bot.man.model.data.ResultItem;
 import com.bot.man.viewmodel.ResponseItemViewModel;
 
 import java.text.SimpleDateFormat;
@@ -21,12 +21,16 @@ public class MainAdapter
 	private Response mResponse;
 
 	public void setResponse(Response response) {
-		mResponse = response;
+		if (mResponse != null && mResponse.component2()) {
+			mResponse = response;
+			notifyDataSetChanged();
+		}
 	}
 
-	@NonNull @Override
-	public MainViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-	                                         int viewType) {
+	@NonNull
+	@Override
+	public MainViewHolder onCreateViewHolder(
+			@NonNull ViewGroup parent, int viewType) {
 		ItemResponseBinding binding = ItemResponseBinding
 				.inflate(LayoutInflater.from(parent.getContext()), parent,
 				         false);
@@ -36,17 +40,22 @@ public class MainAdapter
 
 	@Override
 	public void onBindViewHolder(@NonNull MainViewHolder holder, int position) {
-		Result result = mResponse.getResult().get(position);
+		if (mResponse == null) {
+			return;
+		}
+
+		ResultItem result = mResponse.getResult().get(position);
+
 		ResponseItemViewModel viewModel = new ResponseItemViewModel();
+
 		viewModel.getMFromName()
-		         .setValue(result.getMessage().getFrom().getFirst_name());
+		         .setValue(result.getMessage().getFrom().getFirstName());
 
 		viewModel.getMDate()
 		         .setValue(getFormattedDate(result.getMessage().getDate()));
 
-		viewModel.getMUpdateId().setValue("" + result.getUpdate_id());
-		viewModel.getMUserName()
-		         .setValue(result.getMessage().getFrom().getUsername());
+		viewModel.getMUpdateId().setValue("" + result.getUpdateId());
+		viewModel.getMMessage().setValue(result.getMessage().getText());
 
 		holder.bind(viewModel);
 	}
@@ -63,12 +72,15 @@ public class MainAdapter
 	}
 
 
-	@Override public int getItemCount() {
+	@Override
+	public int getItemCount() {
+		if (mResponse == null || mResponse.getResult().size() <= 0) {
+			return 0;
+		}
 		return mResponse.getResult().size();
 	}
 
-	class MainViewHolder
-			extends RecyclerView.ViewHolder {
+	static class MainViewHolder extends RecyclerView.ViewHolder {
 		private ItemResponseBinding mBinding;
 
 		public MainViewHolder(

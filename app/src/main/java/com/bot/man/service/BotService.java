@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
@@ -43,7 +42,7 @@ public class BotService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		mTelegramBotThread = new TelegramBotThread(this);
+		mTelegramBotThread = new TelegramBotThread();
 		mApiKey =
 				SharedPrefUtils.getInstance().getStringValue("API_KEY") == null
 				? "" : SharedPrefUtils.getInstance().getStringValue("API_KEY");
@@ -94,11 +93,6 @@ public class BotService extends Service {
 
 	private static class TelegramBotThread implements Runnable {
 		private static final String TAG = "TelegramBotThread";
-		private Context mContext;
-
-		TelegramBotThread(Context context) {
-			mContext = context;
-		}
 
 		@Override
 		public void run() {

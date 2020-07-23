@@ -12,4 +12,8 @@ public interface APIWrapper {
 
 	@GET("getUpdates?timeout=100")
 	Call<Response> getUpdate(@Query("offset") Integer offset);
+
+	@GET("getUpdates")
+	Call<Response> sendMessage(
+			@Query("text") String text, @Query("chat_id") Integer chat_id);
 }

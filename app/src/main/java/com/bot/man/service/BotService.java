@@ -14,12 +14,14 @@ import androidx.core.app.NotificationCompat;
 import com.bot.man.R;
 import com.bot.man.api.Helper;
 import com.bot.man.model.data.Response;
+import com.bot.man.model.data.ResultItem;
 import com.bot.man.utils.SharedPrefUtils;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,6 +29,7 @@ import retrofit2.Callback;
 public class BotService extends Service {
 
 	private static final String CHANNEL_ID = "BotService";
+	private static String mApiKey;
 	private TelegramBotThread mTelegramBotThread;
 
 	public BotService() {
@@ -41,6 +44,9 @@ public class BotService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		mTelegramBotThread = new TelegramBotThread(this);
+		mApiKey =
+				SharedPrefUtils.getInstance().getStringValue("API_KEY") == null
+				? "" : SharedPrefUtils.getInstance().getStringValue("API_KEY");
 	}
 
 	@Override
@@ -96,49 +102,48 @@ public class BotService extends Service {
 
 		@Override
 		public void run() {
-			Helper.getInstance(
-					SharedPrefUtils.getInstance().getStringValue("API_KEY"))
-			      .fetchGetUpdates().enqueue(new Callback<Response>() {
-				@Override
-				public void onResponse(
-						@NotNull Call<Response> call,
-						@NotNull retrofit2.Response<Response> response) {
-					if (response.body() != null) {
+			Helper.getInstance(mApiKey).fetchGetUpdates()
+			      .enqueue(new Callback<Response>() {
+				      @Override
+				      public void onResponse(
+						      @NotNull Call<Response> call,
+						      @NotNull retrofit2.Response<Response> response) {
+					      if (response.body() != null) {
 
-						if (response.body().component1() == null) {
-							return;
-						} else {
-							if (response.body().component1().size() <= 0) {
-								run();
-								return;
-							}
-						}
+						      if (response.body().component1() == null) {
+							      return;
+						      } else {
+							      if (response.body().component1().size() <=
+							          0) {
+								      run();
+								      return;
+							      }
+						      }
 
-						Integer offset = response.body().component1()
-						                         .get(response.body()
-						                                      .component1()
-						                                      .size() - 1)
-						                         .getUpdateId();
+						      Integer offset = response.body().component1()
+						                               .get(response.body()
+						                                            .component1()
+						                                            .size() - 1)
+						                               .getUpdateId();
 
-						Log.e(TAG, "Last offset: " + offset);
+						      Log.e(TAG, "Last offset: " + offset);
 
-						Helper.getInstance(SharedPrefUtils.getInstance()
-						                                  .getStringValue(
-								                                  "API_KEY"))
-						      .getUpdate(offset + 1)
-						      .enqueue(new ChatHandler(TelegramBotThread.this));
-					} else {
-						Log.e(TAG, "Response NULL from Thread.");
-					}
-				}
+						      Helper.getInstance(mApiKey).getUpdate(offset + 1)
+						            .enqueue(new ChatHandler(
+								            TelegramBotThread.this));
+					      } else {
+						      Log.e(TAG, "Response NULL from Thread.");
+					      }
+				      }
 
-				@Override
-				public void onFailure(
-						@NotNull Call<Response> call, @NotNull Throwable t) {
+				      @Override
+				      public void onFailure(
+						      @NotNull Call<Response> call,
+						      @NotNull Throwable t) {
 
-					Log.e(TAG, "" + t.getLocalizedMessage());
-				}
-			});
+					      Log.e(TAG, "" + t.getLocalizedMessage());
+				      }
+			      });
 		}
 	}
 
@@ -153,9 +158,67 @@ public class BotService extends Service {
 		@Override
 		public void onResponse(
 				@NotNull Call<Response> call,
-				retrofit2.Response<Response> response) {
+				@NotNull retrofit2.Response<Response> response) {
+			if (response.body() == null) {
+				return;
+			} else {
+				if (response.body().getResult() == null) {
+					return;
+				} else {
+					if (response.body().getResult().size() <= 0) {
+						return;
+					}
+				}
+			}
+
+			List<ResultItem> items = response.body().component1();
+
+			for (int i = 0; i < items.size(); i++) {
+				String requestMessage = items.get(i).getMessage().getText();
+				Integer chatId = items.get(i).getMessage().getChat().getId();
+
+				Log.e(TAG, "" + requestMessage);
+
+				Helper.getInstance(mApiKey)
+				      .sendMessage(getReplyText(requestMessage), chatId)
+				      .enqueue(new Callback<Response>() {
+					      @Override
+					      public void onResponse(
+							      Call<Response> call,
+							      retrofit2.Response<Response> response) {
+						      if (response.body() == null) {
+							      return;
+						      }
+
+						      Log.e(TAG, "SendMessage status: " +
+						                 response.body().getOk());
+					      }
+
+					      @Override
+					      public void onFailure(
+							      Call<Response> call, Throwable t) {
+						      Log.e(TAG, "Error while sending message: " +
+						                 t.getLocalizedMessage());
+					      }
+				      });
+			}
+
 			mBot.run();
 			Log.e(TAG, "ChatHandler status: " + response.body().component2());
+		}
+
+		private String getReplyText(String response) {
+			if ("/start".equals(response)) {
+				return "\\n\\nWelcome to the chat.\\n\\nI am SnapieBot, the " +
+				       "virtual assistant of Prasanna.\\n\\nStart your conversation with /start or /profile";
+			} else if ("/profile".equals(response)) {
+				return "\\nYou can find Prasanna's profile here: https://www.linkedin.com/in/prasanna-srinivasan2905/";
+			} else {
+				return "Please select one of the following tags.\n" +
+				       "    /start\n" + "    /profile\n" + "\n" +
+				       "If you want to start a conversation with Mr. Prasanna, please click @prasansrini29";
+			}
+
 		}
 
 		@Override

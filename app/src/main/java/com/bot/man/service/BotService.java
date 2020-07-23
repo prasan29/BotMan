@@ -18,9 +18,8 @@ import com.bot.man.utils.SharedPrefUtils;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,11 +56,13 @@ public class BotService extends Service {
 
 		startForeground(1, notification);
 
-		ScheduledExecutorService scheduledExecutorService =
-				Executors.newScheduledThreadPool(4);
-		scheduledExecutorService
-				.scheduleAtFixedRate(this::scheduleRunner, 100, 5000,
-				                     TimeUnit.MILLISECONDS);
+		//		ScheduledExecutorService scheduledExecutorService =
+		//				Executors.newScheduledThreadPool(4);
+		//		scheduledExecutorService
+		//				.scheduleAtFixedRate(this::scheduleRunner, 100, 100,
+		//				                     TimeUnit.MILLISECONDS);
+
+		scheduleRunner();
 
 		return START_NOT_STICKY;
 	}
@@ -103,7 +104,28 @@ public class BotService extends Service {
 						@NotNull Call<Response> call,
 						@NotNull retrofit2.Response<Response> response) {
 					if (response.body() != null) {
-						Log.e(TAG, "" + response.body().component2());
+
+						if (response.body().component1() == null) {
+							return;
+						} else {
+							if (response.body().component1().size() <= 0) {
+								return;
+							}
+						}
+
+						Integer offset = response.body().component1()
+						                         .get(response.body()
+						                                      .component1()
+						                                      .size() - 1)
+						                         .getUpdateId();
+
+						Log.e(TAG, "Last offset: " + offset);
+
+						Helper.getInstance(SharedPrefUtils.getInstance()
+						                                  .getStringValue(
+								                                  "API_KEY"))
+						      .getUpdate(offset + 1)
+						      .enqueue(new ChatHandler(TelegramBotThread.this));
 					} else {
 						Log.e(TAG, "Response NULL from Thread.");
 					}
@@ -116,6 +138,41 @@ public class BotService extends Service {
 					Log.e(TAG, "" + t.getLocalizedMessage());
 				}
 			});
+		}
+	}
+
+	private static class ChatHandler implements Callback<Response> {
+		private static final String TAG = "ChatHandler";
+		private final TelegramBotThread mBot;
+
+		public ChatHandler(TelegramBotThread telegramBotThread) {
+			mBot = telegramBotThread;
+		}
+
+		@Override
+		public void onResponse(
+				@NotNull Call<Response> call,
+				retrofit2.Response<Response> response) {
+			mBot.run();
+			Log.e(TAG, "ChatHandler status: " + response.body().component2());
+		}
+
+		@Override
+		public void onFailure(
+				@NotNull Call<Response> call, @NotNull Throwable error) {
+			if (error instanceof SocketTimeoutException) {
+				Log.e(TAG, "Connection timeout!");
+				mBot.run();
+			} else if (error instanceof IOException) {
+				Log.e(TAG, "Timeout!");
+			} else {
+				if (call.isCanceled()) {
+					Log.e(TAG, "Call cancelled by user!");
+				} else {
+					Log.e(TAG, "ChatHandler error status: " +
+					           error.getLocalizedMessage());
+				}
+			}
 		}
 	}
 }

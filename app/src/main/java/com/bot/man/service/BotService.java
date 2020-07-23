@@ -109,6 +109,7 @@ public class BotService extends Service {
 							return;
 						} else {
 							if (response.body().component1().size() <= 0) {
+								run();
 								return;
 							}
 						}

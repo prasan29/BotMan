@@ -7,7 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.widget.Toast;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -16,12 +16,19 @@ import com.bot.man.api.Helper;
 import com.bot.man.model.data.Response;
 import com.bot.man.utils.SharedPrefUtils;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 
 public class BotService extends Service {
 
 	private static final String CHANNEL_ID = "BotService";
+	private TelegramBotThread mTelegramBotThread;
 
 	public BotService() {
 	}
@@ -34,6 +41,7 @@ public class BotService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		mTelegramBotThread = new TelegramBotThread(this);
 	}
 
 	@Override
@@ -49,6 +57,12 @@ public class BotService extends Service {
 
 		startForeground(1, notification);
 
+		ScheduledExecutorService scheduledExecutorService =
+				Executors.newScheduledThreadPool(4);
+		scheduledExecutorService
+				.scheduleAtFixedRate(this::scheduleRunner, 100, 5000,
+				                     TimeUnit.MILLISECONDS);
+
 		return START_NOT_STICKY;
 	}
 
@@ -62,7 +76,17 @@ public class BotService extends Service {
 		manager.createNotificationChannel(channel);
 	}
 
-	static class TelegramBotThread extends Thread {
+	private void scheduleRunner() {
+		mTelegramBotThread.run();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+	}
+
+	private static class TelegramBotThread implements Runnable {
+		private static final String TAG = "TelegramBotThread";
 		private Context mContext;
 
 		TelegramBotThread(Context context) {
@@ -71,25 +95,27 @@ public class BotService extends Service {
 
 		@Override
 		public void run() {
-			while (true) {
-				Helper.getInstance(
-						SharedPrefUtils.getInstance().getStringValue("API_KEY"))
-				      .fetchGetUpdates().enqueue(new Callback<Response>() {
-					@Override
-					public void onResponse(
-							Call<Response> call,
-							retrofit2.Response<Response> response) {
-
+			Helper.getInstance(
+					SharedPrefUtils.getInstance().getStringValue("API_KEY"))
+			      .fetchGetUpdates().enqueue(new Callback<Response>() {
+				@Override
+				public void onResponse(
+						@NotNull Call<Response> call,
+						@NotNull retrofit2.Response<Response> response) {
+					if (response.body() != null) {
+						Log.e(TAG, "" + response.body().component2());
+					} else {
+						Log.e(TAG, "Response NULL from Thread.");
 					}
+				}
 
-					@Override
-					public void onFailure(Call<Response> call, Throwable t) {
-						Toast.makeText(mContext, "" + t.getLocalizedMessage(),
-						               Toast.LENGTH_SHORT).show();
-						interrupt();
-					}
-				});
-			}
+				@Override
+				public void onFailure(
+						@NotNull Call<Response> call, @NotNull Throwable t) {
+
+					Log.e(TAG, "" + t.getLocalizedMessage());
+				}
+			});
 		}
 	}
 }

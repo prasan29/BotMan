@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 		mBinding.setLifecycleOwner(this);
 
 		mErrorListener.observe(this, error -> Toast
-				.makeText(MainActivity.this, "" + error, Toast.LENGTH_SHORT)
-				.show());
+				.makeText(MainActivity.this, "Error: " + error,
+				          Toast.LENGTH_SHORT).show());
 	}
 }

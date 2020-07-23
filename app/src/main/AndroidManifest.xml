@@ -22,6 +22,12 @@
         </activity>
 
         <service android:name=".service.BotService" />
+
+        <receiver android:name=".service.BotService$ConnectivityChecker">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

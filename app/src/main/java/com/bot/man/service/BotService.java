@@ -61,12 +61,6 @@ public class BotService extends Service {
 
 		startForeground(1, notification);
 
-		//		ScheduledExecutorService scheduledExecutorService =
-		//				Executors.newScheduledThreadPool(4);
-		//		scheduledExecutorService
-		//				.scheduleAtFixedRate(this::scheduleRunner, 100, 100,
-		//				                     TimeUnit.MILLISECONDS);
-
 		scheduleRunner();
 
 		return START_NOT_STICKY;

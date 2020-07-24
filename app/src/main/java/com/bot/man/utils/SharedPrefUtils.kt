@@ -52,10 +52,15 @@ class SharedPrefUtils private constructor(context: Context) {
     }
 
     companion object {
-        lateinit var INSTANCE: SharedPrefUtils
+        var INSTANCE: SharedPrefUtils? = null
             private set
         private lateinit var sSharedPreferences: SharedPreferences
 
+        fun init(context: Context) {
+            if (INSTANCE == null) {
+                INSTANCE = SharedPrefUtils(context)
+            }
+        }
     }
 
     init {

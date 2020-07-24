@@ -22,8 +22,8 @@ public class MainViewModel extends ViewModel {
 			MutableLiveData<String> errorListener) {
 		mErrorListener = errorListener;
 
-		String localKey =
-				SharedPrefUtils.getInstance().getStringValue("API_KEY");
+		String localKey = SharedPrefUtils.Companion.getINSTANCE()
+		                                           .getStringValue("API_KEY");
 
 		if (localKey == null) {
 			mIsAPIKeyStored.setValue(false);
@@ -36,8 +36,8 @@ public class MainViewModel extends ViewModel {
 	public void initiateFetch() {
 		MainAdapter mainAdapter = new MainAdapter();
 
-		String localKey =
-				SharedPrefUtils.getInstance().getStringValue("API_KEY");
+		String localKey = SharedPrefUtils.Companion.getINSTANCE()
+		                                           .getStringValue("API_KEY");
 
 		if (localKey == null) {
 			API_KEY = mApiKey.getValue();
@@ -50,8 +50,9 @@ public class MainViewModel extends ViewModel {
 			public void onUpdateChanged(Response response) {
 				mainAdapter.setResponse(response);
 				if (localKey == null) {
-					SharedPrefUtils.getInstance()
-					               .setStringValue("API_KEY", API_KEY);
+					SharedPrefUtils.Companion.getINSTANCE()
+					                         .setStringValue("API_KEY",
+					                                         API_KEY);
 					mApiKey.setValue("");
 					mIsAPIKeyStored.setValue(true);
 				}

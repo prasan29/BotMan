@@ -43,9 +43,10 @@ public class BotService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		mTelegramBotThread = new TelegramBotThread();
-		mApiKey =
-				SharedPrefUtils.getInstance().getStringValue("API_KEY") == null
-				? "" : SharedPrefUtils.getInstance().getStringValue("API_KEY");
+		mApiKey = SharedPrefUtils.Companion.getINSTANCE()
+		                                   .getStringValue("API_KEY") == null
+		          ? "" : SharedPrefUtils.Companion.getINSTANCE()
+		                                          .getStringValue("API_KEY");
 	}
 
 	@Override

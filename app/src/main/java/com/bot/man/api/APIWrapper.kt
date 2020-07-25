@@ -13,7 +13,7 @@ interface APIWrapper {
     fun getUpdate(@Query("offset")
                   offset: Int?): Call<Response?>?
 
-    @GET("getUpdates")
+    @GET("sendMessage")
     fun sendMessage(
             @Query("text") text: String?, @Query("chat_id")
             chat_id: Int?): Call<Response?>?
